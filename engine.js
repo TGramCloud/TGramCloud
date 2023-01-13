@@ -34,6 +34,10 @@ let EngineFunctions = {
   RemoveSetting: function(db, option) {
     db.prepare("DELETE FROM settings WHERE option = ?").run(option);
   },
+
+  ResetSettings: function(db) {
+    db.prepare("DELETE FROM settings").run();
+  },
   
   CheckFirstRun: function(db) {
     switch (
