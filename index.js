@@ -4,32 +4,39 @@ const sql = require("better-sqlite3");
 const child = require("child_process");
 const pm2 = require("pm2");
 
-const token = process.env.TOKEN || process.argv[2];
+const { EngineFunctions, EngineVariables } = require("./engine.js");
+const { CustomFunctions, CustomVariables } = require("./functions.js");
+
 var adminid = "";
-const bot = new TelegramBot(token, {
+const bot = new TelegramBot(EngineVariables.Token, {
   polling: true,
   onlyFirstMatch: true,
 });
-
-const engine = require("./engine.js");
-const functions = require("./functions.js");
 
 if (!fs.existsSync("./config/")) {
   fs.mkdirSync("./config/");
 }
 
-
-var defaultlang = "";
 let settings = new sql("./config/settings.db");
 
-const instance = engine.InitInstance(bot, settings);
+const instance = EngineFunctions.InitInstance(bot, settings);
 
-engine.CreateSettingsTable(settings);
-engine.AddSetting(settings, "token", "");
+EngineFunctions.CreateSettingsTable(settings);
+EngineFunctions.AddSetting(settings, "cloud_token", "");
 
-bot.onText(/\/start/, (msg) => {
-  if (engine.CheckFirstRun(settings) === true) functions.AuthAccount(instance, msg);
+
+bot.onText(/\/login/, (msg) => {
+  if (EngineFunctions.CheckFirstRun(settings) === true) CustomFunctions.AuthAccount(instance, msg);
 });
+
+bot.onText(/\/logout/, (msg) => {
+  CustomFunctions.Logout(instance, msg);
+});
+
+bot.onText(/\/update/, (msg) => {
+  EngineFunctions.Update(instance, msg);
+});
+  
 
 bot.on('polling_error', (err) => {
   console.log(err);
