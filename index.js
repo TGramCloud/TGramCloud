@@ -34,7 +34,7 @@ bot.onText(/\/logout/, (msg) => {
 });
 
 bot.onText(/\/update/, (msg) => {
-  EngineFunctions.Update(instance, msg);
+  EngineFunctions.UpdateBot(child, instance, msg);
 });
   
 
