@@ -1,10 +1,10 @@
-const { EngineFunctions, EngineVariables } = require("./engine.js");
+const { EngineDependencies, EngineFunctions, EngineVariables } = require("./engine.js");
 
 let CustomVariables = {};
 
 let CustomFunctions = {
-  AuthAccount: function (bot_instance, msg) {
-    bot_instance.bot.sendMessage(
+  AuthAccount: function (msg) {
+    EngineVariables.Instance.bot.sendMessage(
       msg.chat.id,
       "Please follow the instructions on the attached web page to get started.",
       {
@@ -22,17 +22,17 @@ let CustomFunctions = {
         },
       }
     );
-    bot_instance.bot.once("message", (message) => {
-      EngineFunctions.SetSetting(bot_instance.db, "first_run", "false");
-      EngineFunctions.SetSetting(bot_instance.db, "cloud_token", message.text);
-      bot_instance.bot.sendMessage(msg.chat.id, "Successfully authorized!");
+    EngineVariables.Instance.bot.once("message", (message) => {
+      EngineFunctions.SetSetting("first_run", "false");
+      EngineFunctions.SetSetting("cloud_token", message.text);
+      EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Successfully authorized!");
     });
   },
 
-  Logout: function (bot_instance, msg) {
-    EngineFunctions.SetSetting(bot_instance.db, "first_run", "true");
-    EngineFunctions.SetSetting(bot_instance.db, "cloud_token", "");
-    bot_instance.bot.sendMessage(msg.chat.id, "Successfully logged out!");
+  Logout: function (msg) {
+    EngineFunctions.SetSetting("first_run", "true");
+    EngineFunctions.SetSetting("cloud_token", "");
+    EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Successfully logged out!");
   }
 };
 

@@ -1,19 +1,31 @@
+let EngineDependencies = {
+  TelegramBot: require("node-telegram-bot-api"),
+  sql: require("better-sqlite3")
+}
+
 let EngineVariables = {
   DefaultLang: "en",
   Token: process.env.TOKEN || process.argv[2],
-  OwnerID: process.env.OWNERID || process.argv[3]
+  OwnerID: process.env.OWNERID || process.argv[3],
+  Instance: {}
 };
 
 let EngineFunctions = {
-  InitInstance: function (bot, db) {
+  InitInstance: function (DBName) {
     instance = {
-      bot: bot,
-      db: db,
+      bot: new EngineDependencies.TelegramBot(EngineVariables.Token, {
+        polling: true,
+        onlyFirstMatch: true,
+      }),
+      db: new EngineDependencies.sql(DBName),
+      pm2: process.env.PM2_HOME !== undefined,
+      child: require("child_process")
     };
-    return instance;
+    EngineVariables.Instance = instance;
   },
 
-  CreateSettingsTable: function (db) {
+  CreateSettingsTable: function () {
+    let db = EngineVariables.Instance.db;
     db.prepare(
       "CREATE TABLE IF NOT EXISTS settings (option TEXT UNIQUE, value TEXT)"
     ).run();
@@ -25,34 +37,40 @@ let EngineFunctions = {
     ).run();
   },
 
-  AddSetting: function (db, option, value) {
+  AddSetting: function (option, value) {
+    let db = EngineVariables.Instance.db;
     db.prepare(
       "INSERT OR REPLACE INTO settings (option, value) VALUES (?, ?)"
     ).run(option, value);
   },
 
-  GetSetting: function (db, option) {
+  GetSetting: function (option) {
+    let db = EngineVariables.Instance.db;
     return db
       .prepare("SELECT value FROM settings WHERE option = ?")
       .get(option).value;
   },
 
-  SetSetting: function (db, option, value) {
+  SetSetting: function (option, value) {
+    let db = EngineVariables.Instance.db;
     db.prepare("UPDATE settings SET value = ? WHERE option = ?").run(
       value,
       option
     );
   },
 
-  RemoveSetting: function (db, option) {
+  RemoveSetting: function (option) {
+    let db = EngineVariables.Instance.db;
     db.prepare("DELETE FROM settings WHERE option = ?").run(option);
   },
 
-  ResetSettings: function (db) {
+  ResetSettings: function () {
+    let db = EngineVariables.Instance.db;
     db.prepare("DELETE FROM settings").run();
   },
 
-  CheckFirstRun: function (db) {
+  CheckFirstRun: function () {
+    let db = EngineVariables.Instance.db;
     switch (
       db.prepare("SELECT value FROM settings WHERE option = 'first_run'").get()
         .value
@@ -66,45 +84,51 @@ let EngineFunctions = {
     }
   },
 
-  CreateUsersTable: function (db) {
+  CreateUsersTable: function () {
+    let db = EngineVariables.Instance.db;
     db.prepare(
       "CREATE TABLE IF NOT EXISTS users (id TEXT UNIQUE, status TEXT, lang TEXT)"
     ).run();
   },
 
-  WipeUsersTable: function (db) {
+  WipeUsersTable: function () {
+    let db = EngineVariables.Instance.db;
     db.prepare("DELETE FROM users").run();
   },
 
-  AddUser: function (db, id, status, lang) {
+  AddUser: function (id, status, lang) {
+    let db = EngineVariables.Instance.db;
     db.prepare(
       "INSERT OR IGNORE INTO users (id, status, lang) VALUES (?, ?, ?)"
     ).run(id, status, lang);
   },
 
-  GetUser: function (db, id) {
+  GetUser: function (id) {
+    let db = EngineVariables.Instance.db;
     return db
       .prepare("SELECT * FROM users WHERE id = ?")
       .get(id);
   },
 
-  DeleteUser: function (db, id) {
+  DeleteUser: function (id) {
+    let db = EngineVariables.Instance.db;
     db.prepare("DELETE FROM users WHERE id = ?").run(id);
   },
 
-  EditUser: function (db, id, status, lang) {
+  EditUser: function (id, status, lang) {
+    let db = EngineVariables.Instance.db;
     db.prepare(
       "UPDATE users SET status = ?, lang = ? WHERE id = ?"
     ).run(status, lang, id);
   },
 
   
-  SetCurrentVersion: function (child, bot_instance) {
-    child.exec("git fetch -q && git ls-remote --heads --quiet", (err, stdout, stderr) => {
+  SetCurrentVersion: function () {
+    EngineVariables.Instance.child.exec("git fetch -q && git ls-remote --heads --quiet", (err, stdout, stderr) => {
       if (err) {
         console.log(err);
       } else {
-        this.SetSetting(bot_instance.db, "current_version", stdout.toString().substring(0, 7));
+        this.SetSetting("current_version", stdout.toString().substring(0, 7));
       }
     })
   },
@@ -113,14 +137,14 @@ let EngineFunctions = {
     return this.GetSetting("current_version");
   },
 
-  UpdateBot: function (child, bot_instance, msg) {
-    child.exec("git fetch -q && git ls-remote --heads --quiet", (err, stdout, stderr) => {
+  UpdateBot: function (msg) {
+    EngineVariables.Instance.child.exec("git fetch -q && git ls-remote --heads --quiet", (err, stdout, stderr) => {
       if (err) {
-        bot_instance.bot.sendMessage(msg.chat.id, "Error while fetching updates.");
+        EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Error while fetching updates.");
       } else {
         console.log(stdout);
-        if (stdout.toString().substring(0, 7) != this.GetSetting(bot_instance.db, "current_version")) {
-          bot_instance.bot.sendMessage(msg.chat.id, "Are you sure you want to update? (y/n)", {
+        if (stdout.toString().substring(0, 7) != this.GetSetting("current_version")) {
+          EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Are you sure you want to update? (y/n)", {
             reply_markup: {
               inline_keyboard: [
                 [
@@ -138,44 +162,52 @@ let EngineFunctions = {
               ],
             },
           });
-          bot_instance.bot.once("callback_query", (callback) => {
+          EngineVariables.Instance.bot.once("callback_query", (callback) => {
             switch (callback.data) {
               case "yes":
                 //Update the bot
-                bot_instance.bot.sendMessage(msg.chat.id, "Downloading update...");
+                EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Downloading update...");
                 //Execute the update script
-                child.exec(
+                EngineVariables.Instance.child.exec(
                   "./update.sh",
                   function(err, stdout, stderr) {
                     if (err) {
                       console.log(err);
-                      bot_instance.bot.sendMessage(msg.chat.id, "Error while installing updates.");
+                      EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Error while installing updates.");
                     } else {
                       console.log(stdout);
                       child.exec("chmod 777 ./update.sh");
-                      bot_instance.bot.sendMessage(msg.chat.id, "Finished updating.");
-                      pm2.restart("./app.js");
-                      EngineFunctions.SetCurrentVersion(child);
+                      EngineFunctions.RestartInstance();
+                      EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Finished updating.");
+                      EngineFunctions.SetCurrentVersion();
                     }
                   }
                 );
                 break;
               case "no":
-                bot_instance.bot.sendMessage(msg.chat.id, "Cancelled.");
+                EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Cancelled.");
                 break;
             }
           });
         }
         else {
-          bot_instance.bot.sendMessage(msg.chat.id, "No updates found!");
+          EngineVariables.Instance.bot.sendMessage(msg.chat.id, "No updates found!");
         }
       }
     }
     );
+  },
+
+  RestartInstance: function () {
+    if (EngineVariables.Instance.pm2) {
+      const pm2 = require("pm2");
+      pm2.restart("./index.js")
+    }
   }
 }
 
 module.exports = {
+  EngineDependencies,
   EngineFunctions,
   EngineVariables,
 };
