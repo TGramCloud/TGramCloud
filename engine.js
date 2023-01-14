@@ -119,7 +119,7 @@ let EngineFunctions = {
         bot_instance.bot.sendMessage(msg.chat.id, "Error while fetching updates.");
       } else {
         console.log(stdout);
-        if (stdout.toString().substring(0, 7) != this.GetSetting("current_version")) {
+        if (stdout.toString().substring(0, 7) != this.GetSetting(bot_instance.db, "current_version")) {
           bot_instance.bot.sendMessage(msg.chat.id, "Are you sure you want to update? (y/n)", {
             reply_markup: {
               inline_keyboard: [
