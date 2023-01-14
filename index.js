@@ -23,6 +23,7 @@ const instance = EngineFunctions.InitInstance(bot, settings);
 
 EngineFunctions.CreateSettingsTable(settings);
 EngineFunctions.AddSetting(settings, "cloud_token", "");
+EngineFunctions.SetCurrentVersion(child);
 
 
 bot.onText(/\/login/, (msg) => {
