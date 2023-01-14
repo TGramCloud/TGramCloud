@@ -99,12 +99,12 @@ let EngineFunctions = {
   },
 
   
-  SetCurrentVersion: function (child) {
+  SetCurrentVersion: function (child, bot_instance) {
     child.exec("git fetch -q && git ls-remote --heads --quiet", (err, stdout, stderr) => {
       if (err) {
         console.log(err);
       } else {
-        this.SetSetting("current_version", stdout.toString().substring(0, 7));
+        this.SetSetting(bot_instance.db, "current_version", stdout.toString().substring(0, 7));
       }
     })
   },
