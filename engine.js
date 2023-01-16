@@ -1,7 +1,8 @@
 //Required dependencies
 let EngineDependencies = {
   TelegramBot: require("node-telegram-bot-api"),
-  sql: require("better-sqlite3")
+  sql: require("better-sqlite3"),
+  fs: require("fs-extra"),
 }
 
 //Variables used by the engine
@@ -21,12 +22,25 @@ let EngineFunctions = {
         polling: true,
         onlyFirstMatch: true,
       }),
-      db: new EngineDependencies.sql(DBName),
+      db: this.InitDB(DBName),
       pm2: process.env.PM2_HOME !== undefined,
       child: require("child_process"),
       owner: EngineVariables.OwnerID,
     };
     EngineVariables.Instance = instance;
+  },
+
+  InitDB: function (DBName) {
+    //If a database file path has subfolders, create them
+    if (DBName.includes("/")) {
+      let DBPath = DBName.split("/");
+      DBPath.pop();
+      EngineDependencies.fs.mkdirSync(DBPath.join("/"), {
+        recursive: true,
+      });
+    }
+    //Create the database file
+    return new EngineDependencies.sql(DBName);
   },
 
   //Create a settings table with stock settings

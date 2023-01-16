@@ -3,7 +3,7 @@ const { CustomFunctions, CustomVariables } = require("./functions.js");
 
 var adminid = "";
 
-EngineFunctions.InitInstance("./settings.db");
+EngineFunctions.InitInstance("./config/settings.db");
 
 EngineFunctions.CreateSettingsTable();
 EngineFunctions.AddSetting("cloud_token", "");
