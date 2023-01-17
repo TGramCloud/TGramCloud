@@ -12,9 +12,9 @@ let CustomFunctions = {
           inline_keyboard: [
             [
               {
-                text: "Authorize OneDrive",
+                text: "Authorize a Cloud Account",
                 web_app: {
-                  url: "https://alexavil.github.io/onedrive-telegram-web/auth.html",
+                  url: "https://tgramcloud.github.io/auth/login.html",
                 },
               },
             ],
