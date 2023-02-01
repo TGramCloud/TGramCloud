@@ -3,14 +3,14 @@ let EngineDependencies = {
   TelegramBot: require("node-telegram-bot-api"),
   sql: require("better-sqlite3"),
   fs: require("fs-extra"),
-}
+};
 
 //Variables used by the engine
 let EngineVariables = {
   DefaultLang: "en",
   Token: process.env.TOKEN || process.argv[2],
   OwnerID: process.env.OWNERID || process.argv[3],
-  Instance: {}
+  Instance: {},
 };
 
 //Functions used by the engine
@@ -267,8 +267,6 @@ let EngineFunctions = {
       pm2.restart("./index.js");
     }
   },
-
-
 };
 
 module.exports = {

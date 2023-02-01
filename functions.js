@@ -1,6 +1,15 @@
-const { EngineDependencies, EngineFunctions, EngineVariables } = require("./engine.js");
+const {
+  EngineDependencies,
+  EngineFunctions,
+  EngineVariables,
+} = require("./engine.js");
 
-let CustomVariables = {};
+let CustomVariables = {
+  CloudProvider: {
+    OneDrive: 0,
+    Yandex: 1,
+  },
+};
 
 let CustomFunctions = {
   AuthAccount: function (msg) {
@@ -25,15 +34,21 @@ let CustomFunctions = {
     EngineVariables.Instance.bot.once("message", (message) => {
       EngineFunctions.SetSetting("first_run", "false");
       EngineFunctions.SetSetting("cloud_token", message.text);
-      EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Successfully authorized!");
+      EngineVariables.Instance.bot.sendMessage(
+        msg.chat.id,
+        "Successfully authorized!"
+      );
     });
   },
 
   Logout: function (msg) {
     EngineFunctions.SetSetting("first_run", "true");
     EngineFunctions.SetSetting("cloud_token", "");
-    EngineVariables.Instance.bot.sendMessage(msg.chat.id, "Successfully logged out!");
-  }
+    EngineVariables.Instance.bot.sendMessage(
+      msg.chat.id,
+      "Successfully logged out!"
+    );
+  },
 };
 
 module.exports = {
