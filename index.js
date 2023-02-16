@@ -16,11 +16,11 @@ EngineFunctions.SetCurrentVersion();
 
 EngineVariables.Instance.bot.onText(/\/login/, (msg) => {
   if (EngineFunctions.CheckFirstRun() === true)
-    CustomFunctions.AuthAccount(instance, msg);
+    CustomFunctions.AuthAccount(msg);
 });
 
 EngineVariables.Instance.bot.onText(/\/logout/, (msg) => {
-  CustomFunctions.Logout(instance, msg);
+  CustomFunctions.Logout(msg);
 });
 
 EngineVariables.Instance.bot.onText(/\/update/, (msg) => {
