@@ -267,6 +267,13 @@ let EngineFunctions = {
       pm2.restart("./index.js");
     }
   },
+
+  CancelCommand: function() {
+    EngineVariables.Instance.bot.sendMessage(
+      msg.chat.id,
+      "Cancelled!"
+    );
+  }
 };
 
 module.exports = {
