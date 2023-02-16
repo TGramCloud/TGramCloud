@@ -268,7 +268,7 @@ let EngineFunctions = {
     }
   },
 
-  CancelCommand: function() {
+  CancelCommand: function(msg) {
     EngineVariables.Instance.bot.sendMessage(
       msg.chat.id,
       "Cancelled!"
