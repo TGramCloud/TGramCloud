@@ -3,7 +3,7 @@ const {
   EngineFunctions,
   EngineVariables,
 } = require("./engine.js");
-const { CustomFunctions, CustomVariables } = require("./functions.js");
+const { CustomFunctions } = require("./functions.js");
 
 var adminid = "";
 
