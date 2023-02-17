@@ -12,6 +12,12 @@ let CustomVariables = {
 };
 
 let CustomFunctions = {
+  CreateTempDir: function() {
+    if (!EngineDependencies.fs.pathExists("./temp")) {
+      return EngineDependencies.fs.mkdir("./temp")
+    } else return false;
+  },
+
   AuthAccount: function (msg) {
     EngineVariables.Instance.bot.sendMessage(
       msg.chat.id,

@@ -13,6 +13,7 @@ EngineFunctions.CreateSettingsTable();
 EngineFunctions.AddSetting("cloud_token", "");
 EngineFunctions.AddSetting("cloud_provider", "");
 EngineFunctions.SetCurrentVersion();
+CustomFunctions.CreateTempDir();
 
 EngineVariables.Instance.bot.onText(/\/login/, (msg) => {
   if (EngineFunctions.CheckFirstRun() === true)
