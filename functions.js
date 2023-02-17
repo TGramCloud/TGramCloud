@@ -4,13 +4,6 @@ const {
   EngineVariables,
 } = require("./engine.js");
 
-let CustomVariables = {
-  CloudProvider: {
-    OneDrive: "onedrive",
-    Yandex: "yandex",
-  },
-};
-
 let CustomFunctions = {
   CreateTempDir: function() {
     if (!EngineDependencies.fs.pathExists("./temp")) {
@@ -144,9 +137,20 @@ let CustomFunctions = {
       }
     }
   },
+
+  UploadFile: function(msg) {
+    EngineVariables.Instance.bot.sendMessage(
+      msg.chat.id,
+      "Please send a file you wish to upload."
+    );
+    EngineVariables.Instance.bot.once("document", (doc) => {
+        bot.downloadFile(doc.document.file_id, "./temp").then((res) => {
+            //TODO: Base upload function
+        });
+    });
+  }
 };
 
 module.exports = {
-  CustomVariables,
   CustomFunctions,
 };
