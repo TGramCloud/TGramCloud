@@ -116,34 +116,15 @@ let CustomFunctions = {
   Logout: function (msg) {
     let provider = EngineFunctions.GetSetting("cloud_provider");
     switch (provider) {
-      case "onedrive": {
-        EngineVariables.Instance.bot.sendMessage(
-          msg.chat.id,
-          "Please visit the web page to deauthorize your account.",
-          {
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: "Deauthorize a Cloud Account",
-                    web_app: {
-                      url: "https://login.microsoftonline.com/common/oauth2/v2.0/logout?post_logout_redirect_uri=https://tgramcloud.github.io/auth/logout.html",
-                    },
-                  },
-                ],
-              ],
-            },
-          }
-        );
-        EngineFunctions.SetSetting("first_run", "true");
-        EngineFunctions.SetSetting("cloud_provider", "");
-        EngineFunctions.SetSetting("cloud_token", "");
-        break;
-      }
+      case "onedrive":
       case "yandex": {
         EngineFunctions.SetSetting("first_run", "true");
         EngineFunctions.SetSetting("cloud_provider", "");
         EngineFunctions.SetSetting("cloud_token", "");
+        EngineVariables.Instance.bot.sendMessage(
+          msg.chat.id,
+          "Your account has been deauthorized!"
+        );
         break;
       }
       case "": {
