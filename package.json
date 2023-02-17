@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@microsoft/microsoft-graph-client": "^3.0.5",
     "better-sqlite3": "^8.0.1",
     "fs-extra": "^11.1.0",
     "node-telegram-bot-api": "^0.61.0",
